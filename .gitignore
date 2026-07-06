@@ -1,0 +1,14 @@
+# sim build artifacts
+sim/work/
+sim/transcript
+sim/*.wlf
+sim/*.ucdb
+sim/covhtml/
+sim/simv*
+sim/csrc/
+sim/*.log
+sim_oss/sim.vvp
+sim_oss/*.vcd
+**/*.vcd
+**/*.fst
+docs/

@@ -1,0 +1,45 @@
+name: axi4lite-ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  sim:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive          # pulls rtl/third_party/verilog-axi
+
+      - name: Install Icarus Verilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
+
+      - name: Regression vs internal slave
+        working-directory: sim_oss
+        run: make DUT=internal NUM_TRANS=1000 SEED=2
+
+      - name: Regression vs third-party axil_ram
+        working-directory: sim_oss
+        run: make DUT=axil_ram NUM_TRANS=1000 SEED=2
+
+      - name: Upload waveforms
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sv-waves
+          path: sim_oss/*.vcd
+          if-no-files-found: ignore
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Verilator
+        run: sudo apt-get update && sudo apt-get install -y verilator
+      - name: Lint RTL (both DUTs)
+        working-directory: sim_oss
+        run: make lint
